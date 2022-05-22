@@ -43,7 +43,7 @@ jobs:
           issue-template: example.md
           issue-number: ${{ steps.create-test-issue.outputs.number }}
           issue-body: ${{ env.ISSUE_BODY }}
-          start-message: Example message
+          message: Example message
 
       - name: Check Error
         if: ${{ steps.start-automated-task.outputs.error != '' }}
