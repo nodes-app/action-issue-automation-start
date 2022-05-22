@@ -1,0 +1,61 @@
+name: Test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Create Test Issue
+        id: create-test-issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+          ISSUE_TITLE: Example
+          ISSUE_BODY: |
+            <!-- Required parameters are marked with an asterisk (*) -->
+            
+            ### Foo *
+            
+            Hello, World!
+            
+            ### Bar
+            
+            Hello, Universe!
+        run: |
+          issue_number=$(
+            basename $(
+              gh issue create \
+                --repo nodes-app/action-issue-automation-start \
+                --title "$ISSUE_TITLE" \
+                --body "$ISSUE_BODY"
+            )
+          )
+          echo "::set-output name=body::$ISSUE_BODY"
+          echo "::set-output name=number::$issue_number"
+
+      - name: Start Automated Task
+        id: start-automated-task
+        uses: ./
+        with:
+          token: ${{ secrets.GH_ACCESS_TOKEN }}
+          issue-template: example.md
+          issue-number: ${{ steps.create-test-issue.outputs.number }}
+          issue-body: ${{ steps.create-test-issue.outputs.body }}
+
+      - name: Check Result
+        env:
+          CONFIG: ${{ steps.start-automated-task.outputs.config }}
+        run: |
+          expected_result=$'{\n  "bar": "Hello, Universe!",\n  "foo": "Hello, World!"\n}'
+          if [ "$CONFIG" != "$expected_result" ]; then
+            echo "Unexpected result: $CONFIG"
+            exit 1
+          fi
+
+      - name: Close Test Issue
+        if: always()
+        env:
+          ISSUE_NUMBER: ${{ steps.create-test-issue.outputs.number }}
+        run: gh issue close $ISSUE_NUMBER --repo nodes-app/action-issue-automation-start
