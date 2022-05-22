@@ -41,7 +41,7 @@ runs:
         REPOSITORY: ${{ github.repository }}
         ISSUE_NUMBER: ${{ inputs.issue-number }}
         GITHUB_TOKEN: ${{ inputs.token }}
-        START_MESSAGE: ${{ inpts.start-message }}
+        START_MESSAGE: ${{ inputs.start-message }}
       run: |
         username="$(gh api /user | jq -r '.login')"
         gh issue edit $ISSUE_NUMBER --repo "$REPOSITORY" --add-assignee "$username"
