@@ -43,6 +43,15 @@ jobs:
           issue-template: example.md
           issue-number: ${{ steps.create-test-issue.outputs.number }}
           issue-body: ${{ steps.create-test-issue.outputs.body }}
+          start-message: Example message
+
+      - name: Check Error
+        if: ${{ steps.start-automated-task.outputs.error != '' }}
+        env:
+          ERROR: ${{ steps.start-automated-task.outputs.error }}
+        run: |
+          echo "error: $ERROR"
+          exit 1
 
       - name: Check Result
         env:
@@ -58,4 +67,5 @@ jobs:
         if: always()
         env:
           ISSUE_NUMBER: ${{ steps.create-test-issue.outputs.number }}
+          GITHUB_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
         run: gh issue close $ISSUE_NUMBER --repo nodes-app/action-issue-automation-start

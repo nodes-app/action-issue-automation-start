@@ -19,6 +19,9 @@ inputs:
     description: Issue Body
     required: true
     default: ${{ github.event.issue.body }}
+  start-message:
+    description: Start Message
+    required: true
 
 outputs:
   config:
@@ -38,14 +41,14 @@ runs:
         REPOSITORY: ${{ github.repository }}
         ISSUE_NUMBER: ${{ inputs.issue-number }}
         GITHUB_TOKEN: ${{ inputs.token }}
+        START_MESSAGE: ${{ inpts.start-message }}
       run: |
         username="$(gh api /user | jq -r '.login')"
         gh issue edit $ISSUE_NUMBER --repo "$REPOSITORY" --add-assignee "$username"
 
         sleep 0.5
 
-        comment="Working on it! This should only take a moment."
-        gh issue comment $ISSUE_NUMBER --repo "$REPOSITORY" --body "$comment"
+        gh issue comment $ISSUE_NUMBER --repo "$REPOSITORY" --body "$START_MESSAGE"
 
     - name: Parse Issue
       id: parse-issue
