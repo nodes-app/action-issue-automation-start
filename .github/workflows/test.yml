@@ -3,6 +3,17 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      ISSUE_BODY: |
+        <!-- Required parameters are marked with an asterisk (*) -->
+
+        ### Foo *
+           
+        Hello, World!
+            
+        ### Bar
+            
+        Hello, Universe!
     steps:
       
       - name: Checkout
@@ -13,16 +24,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
           ISSUE_TITLE: Example
-          ISSUE_BODY: |
-            <!-- Required parameters are marked with an asterisk (*) -->
-            
-            ### Foo *
-            
-            Hello, World!
-            
-            ### Bar
-            
-            Hello, Universe!
         run: |
           issue_number=$(
             basename $(
@@ -32,7 +33,6 @@ jobs:
                 --body "$ISSUE_BODY"
             )
           )
-          echo "::set-output name=body::$ISSUE_BODY"
           echo "::set-output name=number::$issue_number"
 
       - name: Start Automated Task
@@ -42,7 +42,7 @@ jobs:
           token: ${{ secrets.GH_ACCESS_TOKEN }}
           issue-template: example.md
           issue-number: ${{ steps.create-test-issue.outputs.number }}
-          issue-body: ${{ steps.create-test-issue.outputs.body }}
+          issue-body: ${{ env.ISSUE_BODY }}
           start-message: Example message
 
       - name: Check Error
